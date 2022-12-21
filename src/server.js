@@ -1,48 +1,51 @@
 import express from 'express';
-let articlesInfo = [
-  {
-  id: '1',
-  upvotes: 0,
-  comments: []
-},
-{
-  id: '2',
-  upvotes: 0,
-  comments: []
-},
-{
-  id: '3',
-  upvotes: 0,
-  comments: []
-}
-]
+import { db, connectToDb } from './database.js';
 
 const app = express();
 app.use(express.json());
 
-app.put('/api/articles/:id/upvote', (req, res) => {
+app.get('/api/articles/:id', async (req, res) => {
   const { id } = req.params;
-  const article = articlesInfo.find(a => a.id === id);
-  if (article) {
-    article.upvotes += 1; 
-    res.send(`The ${id} article has ${article.upvotes} upvotes`)
-  } else {
-    res.send(`That article does not exist`);
-  }
+  const article = await db.collection('articles').findOne({ id });
+ if (article) {
+  res.json(article) 
+ } else {
+  res.sendStatus(404);
+ }
 });
 
-app.post('/api/articles/:id/comments', (req, res) => {
+app.post('api/articles/:id/comments', async (req, res) => {
   const { id } = req.params;
   const { postedBy, text } = req.body;
-   const article = articlesInfo.find(a => a.id === id)
+  
+  await db.collection('articles').updateOne({ id }, {
+    $push: { comments: { postedBy, text } } });
+  const article = await db.collection('articles').findOne({ id });
   if (article) {
-    article.comments.push( { postedBy, text });
-    res.send(article.comments);
+    res.send(article.comments)
+  } else {
+    res.send('That article does not exist')
+  }
+});
+
+app.put('/api/articles/:id/upvote', async (req, res) => {
+  const { id } = req.params;
+  
+  await db.collection('articles').updateOne({ id }, { 
+    $inc: { upvotes: 1 }})
+  
+  const article = await db.collection('articles').findOne({ id });
+  
+  if (article) {
+    res.send(`Article ${id} has ${article.upvotes} upvotes`)
   } else {
     res.send(`That article does not exist`);
   }
 });
 
-app.listen(8000, () => {
-  console.log('Server is listening on port 8000');
-});
+connectToDb(() => {
+  console.log('Database connected!');
+  app.listen(8000, () => {
+    console.log('Server is listening on port 8000');
+  });
+})
