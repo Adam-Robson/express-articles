@@ -31,13 +31,12 @@ app.post('api/articles/:id/comments', async (req, res) => {
 app.put('/api/articles/:id/upvote', async (req, res) => {
   const { id } = req.params;
   
-  await db.collection('articles').updateOne({ id }, { 
-    $inc: { upvotes: 1 }})
+  await db.collection('articles').updateOne({ id }, { $inc: { upvotes: 1 } })
   
   const article = await db.collection('articles').findOne({ id });
   
   if (article) {
-    res.send(`Article ${id} has ${article.upvotes} upvotes`)
+    res.json(article);
   } else {
     res.send(`That article does not exist`);
   }
