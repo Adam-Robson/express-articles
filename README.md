@@ -1,7 +1,5 @@
-# online-writer-backend
+# express-articles
 
-This repository is the counterpart to my online-writers repository, which is the frontend half of the application.
+This repository is the backend counterpart to react-articles, which is the frontend half of the same application.
 
-This repository is the backend half of the application. I will use Mongo DB to have a persistent database for the articles.
-
-Articles can be upvoted and commented on. 
+I use Mongo DB to have a persistent database for the articles. 
